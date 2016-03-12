@@ -2496,6 +2496,91 @@ GetConnectionInfo(const char * pszFilename,
         return false;
     }
 
+    /***************************************
+     * Construct a valid connection string
+     ***************************************/
+    *ppszConnectionString = (char*) CPLCalloc(strlen(pszFilename),
+            sizeof (char));
+    for (i = 0; i < CSLCount(papszParams); i++) {
+        *ppszConnectionString = 
+            strncat(*ppszConnectionString, papszParams[i], 
+                strlen(papszParams[i]));
+
+        *ppszConnectionString = 
+            strncat(*ppszConnectionString, " ", strlen(" "));
+    }
+
+    nPos = CSLFindName(papszParams, "host");
+    if (nPos != -1) {
+        *ppszHost = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGHOST", NULL) != NULL) {
+        *ppszHost = CPLStrdup(CPLGetConfigOption("PGHOST", NULL));
+    }
+    else
+        *ppszHost = NULL;
+    /*else {
+        CPLError(CE_Failure, CPLE_AppDefined,
+            "Host parameter must be provided, or PGHOST environment "
+            "variable must be set. Please set the host and try again.");
+
+        CSLDestroy(papszParams);
+
+        return false;
+    }*/
+
+    nPos = CSLFindName(papszParams, "port");
+    if (nPos != -1) {
+        *ppszPort = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGPORT", NULL) != NULL ) {
+        *ppszPort = CPLStrdup(CPLGetConfigOption("PGPORT", NULL));
+    }
+    else
+        *ppszPort = NULL;
+    /*else {
+        CPLError(CE_Failure, CPLE_AppDefined,
+            "Port parameter must be provided, or PGPORT environment "
+            "variable must be set. Please set the port and try again.");
+
+        CSLDestroy(papszParams);
+
+        return false;
+    }*/
+
+    nPos = CSLFindName(papszParams, "user");
+    if (nPos != -1) {
+        *ppszUser = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
+        *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
+    }
+    else
+        *ppszUser = NULL;
+    /*else {
+        CPLError(CE_Failure, CPLE_AppDefined,
+            "User parameter must be provided, or PGUSER environment "
+            "variable must be set. Please set the user and try again.");
+
+        CSLDestroy(papszParams);
+
+        return false;
+    }*/
+
+    nPos = CSLFindName(papszParams, "password");
+    if (nPos != -1) {
+        *ppszPassword = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGPASSWORD", NULL) != NULL ) {
+        *ppszPassword = CPLStrdup(CPLGetConfigOption("PGPASSWORD", NULL));
+    }
+    else
+        *ppszPassword = NULL;
+
     /*******************************************************************
      * Get mode:
      *  - 1. ONE_RASTER_PER_ROW: Each row is considered as a separate 
@@ -2527,22 +2612,35 @@ GetConnectionInfo(const char * pszFilename,
      * Case 1: There's no database name: Error, you need, at least,
      * specify a database name (NOTE: insensitive search)
      **/
+    
+    /* Old Code starts
+    
     nPos = CSLFindName(papszParams, "dbname");
     if (nPos == -1) {
-        /*CPLError(CE_Failure, CPLE_AppDefined,
+        CPLError(CE_Failure, CPLE_AppDefined,
                 "You must specify at least a db name");
 
         CSLDestroy(papszParams);
 
-        return false;*/
+        return false;
+    }
 
-        //change by sarthak
-        *ppszDbname = *ppszUser;
-    }
-    else{
-        *ppszDbname = CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));    
-    }
+    *ppszDbname = 
+        CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+
+    Old Code Ends*/
     
+    nPos = CSLFindName(papszParams, "dbname");
+    if (nPos != -1) {
+        *ppszDbname = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
+        *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
+    }
+    else
+        strcpy(*ppszDbname, *ppszUser);
+
 
     /**
      * Case 2: There's database name, but no table name: activate a flag
@@ -2633,91 +2731,6 @@ GetConnectionInfo(const char * pszFilename,
         CPLFree(*ppszWhere);
         *ppszWhere = pszTmp;
     }
-
-    /***************************************
-     * Construct a valid connection string
-     ***************************************/
-    *ppszConnectionString = (char*) CPLCalloc(strlen(pszFilename),
-            sizeof (char));
-    for (i = 0; i < CSLCount(papszParams); i++) {
-        *ppszConnectionString = 
-            strncat(*ppszConnectionString, papszParams[i], 
-                strlen(papszParams[i]));
-
-        *ppszConnectionString = 
-            strncat(*ppszConnectionString, " ", strlen(" "));
-    }
-
-    nPos = CSLFindName(papszParams, "host");
-    if (nPos != -1) {
-        *ppszHost = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGHOST", NULL) != NULL) {
-        *ppszHost = CPLStrdup(CPLGetConfigOption("PGHOST", NULL));
-    }
-    else
-        *ppszHost = NULL;
-    /*else {
-        CPLError(CE_Failure, CPLE_AppDefined,
-            "Host parameter must be provided, or PGHOST environment "
-            "variable must be set. Please set the host and try again.");
-
-        CSLDestroy(papszParams);
-
-        return false;
-    }*/
-
-    nPos = CSLFindName(papszParams, "port");
-    if (nPos != -1) {
-        *ppszPort = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGPORT", NULL) != NULL ) {
-        *ppszPort = CPLStrdup(CPLGetConfigOption("PGPORT", NULL));
-    }
-    else
-        *ppszPort = NULL;
-    /*else {
-        CPLError(CE_Failure, CPLE_AppDefined,
-            "Port parameter must be provided, or PGPORT environment "
-            "variable must be set. Please set the port and try again.");
-
-        CSLDestroy(papszParams);
-
-        return false;
-    }*/
-
-    nPos = CSLFindName(papszParams, "user");
-    if (nPos != -1) {
-        *ppszUser = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
-        *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
-    }
-    else
-        *ppszUser = NULL;
-    /*else {
-        CPLError(CE_Failure, CPLE_AppDefined,
-            "User parameter must be provided, or PGUSER environment "
-            "variable must be set. Please set the user and try again.");
-
-        CSLDestroy(papszParams);
-
-        return false;
-    }*/
-
-    nPos = CSLFindName(papszParams, "password");
-    if (nPos != -1) {
-        *ppszPassword = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGPASSWORD", NULL) != NULL ) {
-        *ppszPassword = CPLStrdup(CPLGetConfigOption("PGPASSWORD", NULL));
-    }
-    else
-        *ppszPassword = NULL;
 
     CSLDestroy(papszParams);
 
