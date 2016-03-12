@@ -2529,16 +2529,20 @@ GetConnectionInfo(const char * pszFilename,
      **/
     nPos = CSLFindName(papszParams, "dbname");
     if (nPos == -1) {
-        CPLError(CE_Failure, CPLE_AppDefined,
+        /*CPLError(CE_Failure, CPLE_AppDefined,
                 "You must specify at least a db name");
 
         CSLDestroy(papszParams);
 
-        return false;
-    }
+        return false;*/
 
-    *ppszDbname = 
-        CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+        //change by sarthak
+        *ppszDbname = *ppszUser;
+    }
+    else{
+        *ppszDbname = CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));    
+    }
+    
 
     /**
      * Case 2: There's database name, but no table name: activate a flag
