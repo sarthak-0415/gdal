@@ -2527,7 +2527,7 @@ GetConnectionInfo(const char * pszFilename,
      * Case 1: There's no database name: Error, you need, at least,
      * specify a database name (NOTE: insensitive search)
      **/
-    nPos = CSLFindName(papszParams, "dbname");
+    /*nPos = CSLFindName(papszParams, "dbname");
     if (nPos == -1) {
         CPLError(CE_Failure, CPLE_AppDefined,
                 "You must specify at least a db name");
@@ -2539,7 +2539,17 @@ GetConnectionInfo(const char * pszFilename,
 
     *ppszDbname = 
         CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-
+    */
+    nPos = CSLFindName(papszParams, "dbname");
+    if (nPos != -1) {
+        *ppszDbname = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
+        *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
+    }
+    else
+        strcpy(*ppszDbname, *tempUser);
     /**
      * Case 2: There's database name, but no table name: activate a flag
      * for browsing the database, fetching all the schemas that contain
