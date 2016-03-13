@@ -2550,6 +2550,7 @@ GetConnectionInfo(const char * pszFilename,
     }
     else
         *ppszUser = NULL;
+
     
     nPos = CSLFindName(papszParams, "dbname");
     if (nPos != -1) {
@@ -2560,8 +2561,7 @@ GetConnectionInfo(const char * pszFilename,
         *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
     }
     else
-        return false;
-        //strcpy(*ppszDbname, *tempUser);
+        strcpy(*ppszDbname, *ppszUser);
     /**
      * Case 2: There's database name, but no table name: activate a flag
      * for browsing the database, fetching all the schemas that contain
