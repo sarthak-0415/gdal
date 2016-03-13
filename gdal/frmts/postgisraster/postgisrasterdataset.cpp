@@ -2527,8 +2527,6 @@ GetConnectionInfo(const char * pszFilename,
      * Case 1: There's no database name: Error, you need, at least,
      * specify a database name (NOTE: insensitive search)
      **/
-    /* Old Code starts
-    
     nPos = CSLFindName(papszParams, "dbname");
     if (nPos == -1) {
         CPLError(CE_Failure, CPLE_AppDefined,
@@ -2542,29 +2540,6 @@ GetConnectionInfo(const char * pszFilename,
     *ppszDbname = 
         CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
 
-    Old Code Ends*/
-    
-    //code to find the user in case database name is not available
-    char ** tempUser;
-    nPos = CSLFindName(papszParams, "user");
-    if (nPos != -1) 
-        *tempUser = CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) 
-        *tempUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
-    else
-        *tempUser = NULL;
-    //code ends
-
-    nPos = CSLFindName(papszParams, "dbname");
-    if (nPos != -1) {
-        *ppszDbname = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
-        *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
-    }
-    else
-        strcpy(*ppszDbname, *tempUser);
     /**
      * Case 2: There's database name, but no table name: activate a flag
      * for browsing the database, fetching all the schemas that contain
