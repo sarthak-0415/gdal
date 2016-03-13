@@ -2540,6 +2540,17 @@ GetConnectionInfo(const char * pszFilename,
     *ppszDbname = 
         CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
     */
+    nPos = CSLFindName(papszParams, "user");
+    if (nPos != -1) {
+        *ppszUser = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
+        *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
+    }
+    else
+        *ppszUser = NULL;
+    
     nPos = CSLFindName(papszParams, "dbname");
     if (nPos != -1) {
         *ppszDbname = 
