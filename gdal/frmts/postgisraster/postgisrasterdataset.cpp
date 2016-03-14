@@ -2463,7 +2463,7 @@ GBool PostGISRasterDataset::SetRasterProperties
 /***********************************************************************
  * \brief Get the connection information for a filename. 
  * 
- * This method extracts these dataset parameters from the connection 
+ * This method extracts these dataset parameters from the connection
  * string, if present:
  * - pszSchema: The schema where the table belongs
  * - pszTable: The table's name
@@ -2540,6 +2540,10 @@ GetConnectionInfo(const char * pszFilename,
     *ppszDbname = 
         CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
     */
+    /**
+     * 
+     */
+
     nPos = CSLFindName(papszParams, "user");
     if (nPos != -1) {
         *ppszUser = 
@@ -2549,7 +2553,7 @@ GetConnectionInfo(const char * pszFilename,
         *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
     }
     else
-        *ppszUser = NULL;
+        *ppszUser = getlogin();
 
     
     nPos = CSLFindName(papszParams, "dbname");
@@ -2560,10 +2564,9 @@ GetConnectionInfo(const char * pszFilename,
     else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
         *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
     }
-    else if(*ppszUser != NULL)
+    else 
         strcpy(*ppszDbname, *ppszUser);
-    else
-        *ppszDbname = NULL;
+    
     /**
      * Case 2: There's database name, but no table name: activate a flag
      * for browsing the database, fetching all the schemas that contain
@@ -2717,7 +2720,7 @@ GetConnectionInfo(const char * pszFilename,
         *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
     }
     else
-        *ppszUser = NULL;
+        *ppszUser = getlogin();
     /*else {
         CPLError(CE_Failure, CPLE_AppDefined,
             "User parameter must be provided, or PGUSER environment "
