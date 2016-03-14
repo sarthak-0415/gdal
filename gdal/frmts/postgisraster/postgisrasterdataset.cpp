@@ -2544,16 +2544,16 @@ GetConnectionInfo(const char * pszFilename,
      * 
      */
 
-    nPos = CSLFindName(papszParams, "user");
-    if (nPos != -1) {
-        *ppszUser = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
-        *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
-    }
-    else
-        *ppszUser = getlogin();
+        nPos = CSLFindName(papszParams, "user");
+        if (nPos != -1) {
+            *ppszUser = 
+                CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+        }
+        else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
+            *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
+        }
+        else
+            *ppszUser = getlogin();
 
     
     nPos = CSLFindName(papszParams, "dbname");
@@ -2564,8 +2564,18 @@ GetConnectionInfo(const char * pszFilename,
     else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
         *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
     }
-    else 
-        strcpy(*ppszDbname, *ppszUser);
+    else{
+        nPos = CSLFindName(papszParams, "user");
+        if (nPos != -1) {
+            *ppszDbname = 
+                CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+        }
+        else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
+            *ppszDbname = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
+        }
+        else
+            *ppszDbname = getlogin();
+    }
     
     /**
      * Case 2: There's database name, but no table name: activate a flag
