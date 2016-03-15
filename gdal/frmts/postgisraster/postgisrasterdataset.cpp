@@ -2524,39 +2524,22 @@ GetConnectionInfo(const char * pszFilename,
         *nMode = ONE_RASTER_PER_ROW;
 
     /**
-     * Get the Database name , Cases:
-     * 1. if the database is mentioned in the command.
-     * 2. else if the database name is present in POSTGIS env var (PGDATABASE)
-     * 3. else the default user name will be the database name
-     * 4. ppzDbname will be empty string.
-     */
-     
-    nPos = CSLFindName(papszParams, "user");
-    if (nPos != -1) {
-        *ppszUser = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
-        *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
-    }
-    else
-        *ppszUser = NULL;
-
-
+     * Case 1: There's no database name: Error, you need, at least,
+     * specify a database name (NOTE: insensitive search)
+     **/
     nPos = CSLFindName(papszParams, "dbname");
-    if (nPos != -1) {
-        *ppszDbname = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    }
-    else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
-        *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
-    }
-    else if(*ppszUser != NULL)
-        strcpy(*ppszDbname, *ppszUser);
-    else
-        *ppszDbname = NULL;
+    if (nPos == -1) {
+        CPLError(CE_Failure, CPLE_AppDefined,
+                "You must specify at least a db name");
 
-    
+        CSLDestroy(papszParams);
+
+        return false;
+    }
+
+    *ppszDbname = 
+        CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+
     /**
      * Case 2: There's database name, but no table name: activate a flag
      * for browsing the database, fetching all the schemas that contain
