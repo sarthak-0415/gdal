@@ -2523,19 +2523,19 @@ GetConnectionInfo(const char * pszFilename,
     else
         *nMode = ONE_RASTER_PER_ROW;
 
+    
     /**
-     * Case 1: There's no database name: Error, you need, at least,
-     * specify a database name (NOTE: insensitive search)
+     * Case 1: If there is no database name present then @ppzDbname is empty. (NOTE: insensitive search)
      **/
     nPos = CSLFindName(papszParams, "dbname");
-    if (nPos == -1) {
+    /*if (nPos == -1) {
         CPLError(CE_Failure, CPLE_AppDefined,
                 "You must specify at least a db name");
 
         CSLDestroy(papszParams);
 
         return false;
-    }
+    }*/
 
     *ppszDbname = 
         CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
