@@ -2547,7 +2547,7 @@ GetConnectionInfo(const char * pszFilename,
 /*Implementation suggested by dimitry
     /**
      * If the dbname is not provided by the user then make it NULL.
-     **/
+     **
     if (nPos == -1) {
         *ppszUser = NULL;
     }
@@ -2556,15 +2556,15 @@ GetConnectionInfo(const char * pszFilename,
             CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
     
     }
-    
-/* implementation 1 suggested by sarthak
+*/
+// implementation 1 suggested by sarthak
      /**
      * Get the Database name , Cases:
      * 1. if the database is mentioned in the command.
      * 2. else if the database name is present in POSTGIS env var (PGDATABASE)
      * 3. else the default user name will be the database name
      * 4. ppzDbname will be empty string.
-     *
+     */
      
     nPos = CSLFindName(papszParams, "user");
     if (nPos != -1) {
@@ -2591,7 +2591,6 @@ GetConnectionInfo(const char * pszFilename,
     else
         *ppszDbname = NULL;
 
-*/
 
     /**
      * Case 2: There's database name, but no table name: activate a flag
