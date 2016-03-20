@@ -2523,22 +2523,72 @@ GetConnectionInfo(const char * pszFilename,
     else
         *nMode = ONE_RASTER_PER_ROW;
 
-    
+
+//Get the Database name     
+/*Initial Implementation
     /**
-     * Case 1: If there is no database name present then @ppzDbname is empty. (NOTE: insensitive search)
-     **/
+     * Case 1: There's no database name: Error, you need, at least,
+     * specify a database name (NOTE: insensitive search)
+     **
     nPos = CSLFindName(papszParams, "dbname");
-    /*if (nPos == -1) {
+    if (nPos == -1) {
         CPLError(CE_Failure, CPLE_AppDefined,
                 "You must specify at least a db name");
 
         CSLDestroy(papszParams);
 
         return false;
-    }*/
+    }
 
     *ppszDbname = 
         CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+*/
+
+/*Implementation suggested by dimitry
+    /**
+     * If the dbname is not provided by the user then make it NULL.
+     **
+    if (nPos == -1) {
+        *ppszUser = NULL;
+    }
+    else{
+        *ppszDbname = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    
+    }
+*/
+// implementation 1 suggested by sarthak
+     /**
+     * Get the Database name , Cases:
+     * 1. if the database is mentioned in the command.
+     * 2. else if the database name is present in POSTGIS env var (PGDATABASE)
+     * 3. else the default user name will be the database name
+     * 4. ppzDbname will be empty string.
+     */
+     
+    nPos = CSLFindName(papszParams, "user");
+    if (nPos != -1) {
+        *ppszUser = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGUSER", NULL) != NULL ) {
+        *ppszUser = CPLStrdup(CPLGetConfigOption("PGUSER", NULL));
+    }
+    else
+        *ppszUser = NULL;
+    
+    nPos = CSLFindName(papszParams, "dbname");
+    if (nPos != -1) {
+        *ppszDbname = 
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
+    }
+    else if (CPLGetConfigOption("PGDATABASE", NULL) != NULL ) {
+        *ppszDbname = CPLStrdup(CPLGetConfigOption("PGDATABASE", NULL));
+    }
+    else if(*ppszUser != NULL)
+        strcpy(*ppszDbname, *ppszUser);
+    else
+        *ppszDbname = NULL;
 
     /**
      * Case 2: There's database name, but no table name: activate a flag
@@ -2723,7 +2773,8 @@ GetConnectionInfo(const char * pszFilename,
         "Mode: %d\nDbname: %s\nSchema: %s\nTable: %s\nColumn: %s\nWhere: %s\n"
         "Host: %s\nPort: %s\nUser: %s\nPassword: %s\n"
         "Connection String: %s\n", 
-        *nMode, *ppszDbname,
+        *nMode, 
+        *ppszDbname ? *ppszDbname : "(null)",
         *ppszSchema ? *ppszSchema : "(null)",
         *ppszTable ? *ppszTable : "(null)",
         *ppszColumn ? *ppszColumn : "(null)",
@@ -2735,7 +2786,7 @@ GetConnectionInfo(const char * pszFilename,
         *ppszConnectionString);
 #endif
 
-    return true;
+    return false;
 }
 
 /***********************************************************************
