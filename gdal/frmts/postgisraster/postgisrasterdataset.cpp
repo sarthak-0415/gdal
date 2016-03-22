@@ -2534,8 +2534,7 @@ GetConnectionInfo(const char * pszFilename,
     }
     else{
         *ppszDbname = 
-            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));
-    
+            CPLStrdup(CPLParseNameValue(papszParams[nPos], NULL));    
     }
 
     /**

@@ -75,6 +75,7 @@ PGconn* PostGISRasterDriver::GetConnection(const char* pszConnectionString,
     if( pszHostIn == NULL ) pszHostIn = "(null)";
     if( pszPortIn == NULL ) pszPortIn = "(null)";
     if( pszUserIn == NULL ) pszUserIn = "(null)";
+    if( pszDbnameIn == NULL) pszDbnameIn = "(null)";
     CPLString osKey = pszDbnameIn;
     osKey += "-";
     osKey += pszHostIn;
